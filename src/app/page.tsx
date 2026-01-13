@@ -1,65 +1,66 @@
-import Image from "next/image";
+'use client';
+
+import Head from 'next/head';
+import { useWeather } from '@/hooks/useWeather';
+import SearchBar from '@/components/SearchBar';
+import CurrentWeather from '@/components/CurrentWeather';
+import ForecastRow from '@/components/ForecastRow';
+import WeatherSkeleton from '@/components/WeatherSkeleton';
+import { CloudRain } from 'lucide-react';
 
 export default function Home() {
+  const { current, forecast, loading, error, fetchWeather } = useWeather();
+
+  const handleSearch = (city: string) => {
+    fetchWeather(city);
+  };
+
+  const glassPanelClass = "bg-white/10 backdrop-blur-md border border-white/20 shadow-xl";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen py-8 px-4 md:px-8 flex items-center justify-center">
+      <div className="w-full max-w-4xl mx-auto">
+        
+        {/* Header/Brand */}
+        <header className="flex items-center justify-center gap-2 mb-10">
+          <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md border border-white/20">
+            <CloudRain className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+            Weather<span className="font-light">Scope</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </header>
+
+        <SearchBar onSearch={handleSearch} />
+
+        {error && (
+          <div className={`${glassPanelClass} p-4 mb-8 text-center border-red-400/30 bg-red-400/10 rounded-xl animate-fade-in`}>
+            <p className="text-red-100 font-medium">
+              {error === 'City not found' ? 'City not found. Please try again.' : error}
+            </p>
+          </div>
+        )}
+
+        {loading ? (
+          <WeatherSkeleton />
+        ) : (
+          <>
+            {current && <CurrentWeather data={current} />}
+            {forecast && <ForecastRow data={forecast} />}
+            
+            {/* Empty state hint */}
+            {!current && !forecast && !error && (
+              <div className="text-center text-white/50 mt-20">
+                <p>Enter a city name to see the weather.</p>
+              </div>
+            )}
+          </>
+        )}
+        
+        <footer className="mt-16 text-center text-white/30 text-xs">
+          <p>© {new Date().getFullYear()} WeatherScope. Powered by OpenWeatherMap.</p>
+        </footer>
+      </div>
+    </main>
   );
 }
